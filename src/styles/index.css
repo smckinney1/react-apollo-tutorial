@@ -20,12 +20,16 @@ input {
   background-color: rgb(246, 246, 239);
 }
 
-.f11 {
-  font-size: 11px;
-}
-
 .w85 {
   width: 85%;
+}
+
+.bg-none {
+  background: none;
+}
+
+.br-none {
+  border: none;
 }
 
 .button {

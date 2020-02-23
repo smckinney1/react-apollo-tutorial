@@ -4,7 +4,7 @@ import gql from 'graphql-tag';
 
 import Link from './Link';
 
-const FEED_QUERY = gql`
+export const FEED_QUERY = gql`
   {
     feed {
       links {
@@ -12,12 +12,30 @@ const FEED_QUERY = gql`
         createdAt
         url
         description
+        postedBy {
+          id
+          name
+        }
+        votes {
+          id
+          user {
+            id
+          }
+        }
       }
     }
   }
 `;
 
 const LinkList = () => {
+  const updateStoreAfterVote = (store, createVote, linkId) => {
+    const data = store.readQuery({ query: FEED_QUERY });
+    const votedLink = data.feed.links.find(link => link.id === linkId);
+    votedLink.votes = createVote.link.votes;
+
+    store.writeQuery({ query: FEED_QUERY, data });
+  };
+
   return (
     <Query query={FEED_QUERY}>
       {({ loading, error, data }) => {
@@ -27,11 +45,15 @@ const LinkList = () => {
         const { links } = data.feed;
 
         return (
-          <div>
+          <ol className="gray">
             {links.map(link => (
-              <Link key={link.id} link={link} />
+              <Link
+                key={link.id}
+                link={link}
+                updateStoreAfterVote={updateStoreAfterVote}
+              />
             ))}
-          </div>
+          </ol>
         );
       }}
     </Query>

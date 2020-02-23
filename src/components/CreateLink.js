@@ -3,6 +3,9 @@ import { useHistory } from 'react-router-dom';
 import { Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
 
+import { FEED_QUERY } from './LinkList';
+
+// NOTE: The server provides no query to read the user, so "postedBy" can't be sent.
 const POST_MUTATION = gql`
   mutation PostMutation($description: String!, $url: String!) {
     post(description: $description, url: $url) {
@@ -20,9 +23,19 @@ const CreateLink = () => {
 
   const history = useHistory();
 
-  function handleSubmit() {
+  const handleSubmit = () => {
     history.push('/');
-  }
+  };
+
+  const updateStoreAfterCreate = (store, post) => {
+    const data = store.readQuery({ query: FEED_QUERY });
+    data.feed.links.unshift(post);
+
+    store.writeQuery({
+      query: FEED_QUERY,
+      data,
+    });
+  };
 
   return (
     <div>
@@ -46,6 +59,9 @@ const CreateLink = () => {
         mutation={POST_MUTATION}
         variables={{ description, url }}
         onCompleted={handleSubmit}
+        update={(store, { data: { post } }) =>
+          updateStoreAfterCreate(store, post)
+        }
       >
         {postMutation => <button onClick={postMutation}>Submit</button>}
       </Mutation>
