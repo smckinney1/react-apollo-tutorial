@@ -41,14 +41,14 @@ const CreateLink = () => {
     <div>
       <div className="flex flex-column mt3">
         <input
-          className="mb2"
+          className="mb2 pa2"
           value={description}
           onChange={e => setDescription(e.target.value)}
           type="text"
           placeholder="A description for the link"
         />
         <input
-          className="mb2"
+          className="mb2 pa2"
           value={url}
           onChange={e => setUrl(e.target.value)}
           type="text"
@@ -63,7 +63,11 @@ const CreateLink = () => {
           updateStoreAfterCreate(store, post)
         }
       >
-        {postMutation => <button onClick={postMutation}>Submit</button>}
+        {postMutation => (
+          <button className="pa2 br2 bg-green dark-gray" onClick={postMutation}>
+            Submit
+          </button>
+        )}
       </Mutation>
     </div>
   );
