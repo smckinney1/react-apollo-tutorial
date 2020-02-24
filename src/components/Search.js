@@ -52,11 +52,9 @@ const Search = ({ client }) => {
       >
         search
       </button>
-      <ol className="gray">
-        {links.map(link => (
-          <Link key={link.id} link={link} />
-        ))}
-      </ol>
+      {links.map((link, index) => (
+        <Link key={link.id} link={link} index={index} />
+      ))}
     </div>
   );
 };
