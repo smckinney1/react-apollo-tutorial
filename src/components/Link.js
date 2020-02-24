@@ -32,9 +32,7 @@ const Link = ({ index, link, updateStoreAfterVote }) => {
 
   return (
     <div className="flex mt3 items-start">
-      <div className="flex items-center">
-        <span className="gray">{linkNumber}</span>
-      </div>
+      <div className="flex items-center">{linkNumber}</div>
       {authToken && (
         <Mutation
           mutation={VOTE_MUTATION}
