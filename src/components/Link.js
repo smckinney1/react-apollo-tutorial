@@ -52,7 +52,15 @@ const Link = ({ link, updateStoreAfterVote }) => {
 
         <div className="ml1">
           <div>
-            {link.description} {link.url}
+            {link.description}{' '}
+            <a
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              alt={link.description}
+            >
+              {link.url}
+            </a>
           </div>
           <div className="f6 lh-copy gray">
             {link.votes?.length} votes | by{' '}
