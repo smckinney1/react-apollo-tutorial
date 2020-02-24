@@ -1,22 +1,12 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { Mutation } from 'react-apollo';
-import gql from 'graphql-tag';
+import { loader } from 'graphql.macro';
 
-import { FEED_QUERY } from './LinkList';
 import { LINKS_PER_PAGE } from '../constants';
 
-// NOTE: The server provides no query to read the user, so "postedBy" can't be sent.
-const POST_MUTATION = gql`
-  mutation PostMutation($description: String!, $url: String!) {
-    post(description: $description, url: $url) {
-      id
-      createdAt
-      url
-      description
-    }
-  }
-`;
+const FEED_QUERY = loader('../graphql/queries/feed.graphql');
+const POST_MUTATION = loader('../graphql/mutations/post.graphql');
 
 const CreateLink = () => {
   const [description, setDescription] = React.useState('');

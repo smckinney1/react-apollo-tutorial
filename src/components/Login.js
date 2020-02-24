@@ -1,25 +1,12 @@
 import React from 'react';
 import { Mutation } from 'react-apollo';
-import gql from 'graphql-tag';
+import { loader } from 'graphql.macro';
 
 import useInputChange from '../hooks/useInputChange';
 import { AUTH_TOKEN } from '../constants';
 
-const SIGNUP_MUTATION = gql`
-  mutation SignupMutation($email: String!, $password: String!, $name: String!) {
-    signup(email: $email, password: $password, name: $name) {
-      token
-    }
-  }
-`;
-
-const LOGIN_MUTATION = gql`
-  mutation LoginMutation($email: String!, $password: String!) {
-    login(email: $email, password: $password) {
-      token
-    }
-  }
-`;
+const SIGNUP_MUTATION = loader('../graphql/mutations/signup.graphql');
+const LOGIN_MUTATION = loader('../graphql/mutations/login.graphql');
 
 const Login = ({ history }) => {
   const [login, setLogin] = React.useState(false);

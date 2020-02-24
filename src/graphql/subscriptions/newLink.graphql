@@ -1,0 +1,18 @@
+subscription {
+  newLink {
+    id
+    url
+    description
+    createdAt
+    postedBy {
+      id
+      name
+    }
+    votes {
+      id
+      user {
+        id
+      }
+    }
+  }
+}
