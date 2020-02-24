@@ -1,6 +1,6 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { Mutation } from 'react-apollo';
+import { useMutation } from 'react-apollo';
 import { loader } from 'graphql.macro';
 
 import { LINKS_PER_PAGE } from '../constants';
@@ -14,27 +14,28 @@ const CreateLink = () => {
 
   const history = useHistory();
 
-  const handleSubmit = () => {
-    history.push('/new/1');
-  };
+  const [submitPost] = useMutation(POST_MUTATION, {
+    onCompleted() {
+      history.push('/new/1');
+    },
+    update(store, { data: { post } }) {
+      const first = LINKS_PER_PAGE;
+      const skip = 0;
+      const orderBy = 'createdAt_DESC';
+      const data = store.readQuery({
+        query: FEED_QUERY,
+        variables: { first, skip, orderBy },
+      });
 
-  const updateStoreAfterCreate = (store, post) => {
-    const first = LINKS_PER_PAGE;
-    const skip = 0;
-    const orderBy = 'createdAt_DESC';
-    const data = store.readQuery({
-      query: FEED_QUERY,
-      variables: { first, skip, orderBy },
-    });
+      data.feed.links.unshift(post);
 
-    data.feed.links.unshift(post);
-
-    store.writeQuery({
-      query: FEED_QUERY,
-      data,
-      variables: { first, skip, orderBy },
-    });
-  };
+      store.writeQuery({
+        query: FEED_QUERY,
+        data,
+        variables: { first, skip, orderBy },
+      });
+    },
+  });
 
   return (
     <div>
@@ -54,20 +55,14 @@ const CreateLink = () => {
           placeholder="The URL for the link"
         />
       </div>
-      <Mutation
-        mutation={POST_MUTATION}
-        variables={{ description, url }}
-        onCompleted={handleSubmit}
-        update={(store, { data: { post } }) =>
-          updateStoreAfterCreate(store, post)
-        }
+      <button
+        className="pa2 br2 bg-green dark-gray"
+        onClick={() => {
+          submitPost({ variables: { description, url } });
+        }}
       >
-        {postMutation => (
-          <button className="pa2 br2 bg-green dark-gray" onClick={postMutation}>
-            submit
-          </button>
-        )}
-      </Mutation>
+        submit
+      </button>
     </div>
   );
 };

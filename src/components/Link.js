@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mutation } from 'react-apollo';
+import { useMutation } from '@apollo/react-hooks';
 import { loader } from 'graphql.macro';
 
 import { AUTH_TOKEN } from '../constants';
@@ -8,6 +8,12 @@ import { timeDifferenceForDate } from '../utils';
 const VOTE_MUTATION = loader('../graphql/mutations/vote.graphql');
 
 const Link = ({ index, link, updateStoreAfterVote }) => {
+  const [addVote] = useMutation(VOTE_MUTATION, {
+    update(store, { data: { vote } }) {
+      updateStoreAfterVote(store, vote, link.id);
+    },
+  });
+
   const authToken = localStorage.getItem(AUTH_TOKEN);
 
   // Seems super hackish compared to using <ol>, but this is because of pagination.
@@ -17,23 +23,16 @@ const Link = ({ index, link, updateStoreAfterVote }) => {
     <div className="flex mt3 items-start">
       <div className="flex items-center">{linkNumber}</div>
       {authToken && (
-        <Mutation
-          mutation={VOTE_MUTATION}
-          variables={{ linkId: link.id }}
-          // update will be called right after server returns a response ("store" is current cache)
-          update={(store, { data: { vote } }) => {
-            updateStoreAfterVote(store, vote, link.id);
+        <button
+          className="ml1 br-none bg-none green pointer"
+          onClick={() => {
+            addVote({
+              variables: { linkId: link.id },
+            });
           }}
         >
-          {voteMutation => (
-            <button
-              className="ml1 br-none bg-none green pointer"
-              onClick={voteMutation}
-            >
-              ▲
-            </button>
-          )}
-        </Mutation>
+          ▲
+        </button>
       )}
 
       <div className="ml1">
