@@ -1,28 +1,11 @@
 import React from 'react';
-import gql from 'graphql-tag';
 import { Mutation } from 'react-apollo';
+import { loader } from 'graphql.macro';
+
 import { AUTH_TOKEN } from '../constants';
 import { timeDifferenceForDate } from '../utils';
 
-const VOTE_MUTATION = gql`
-  mutation VoteMutation($linkId: ID!) {
-    vote(linkId: $linkId) {
-      id
-      link {
-        id
-        votes {
-          id
-          user {
-            id
-          }
-        }
-      }
-      user {
-        id
-      }
-    }
-  }
-`;
+const VOTE_MUTATION = loader('../graphql/mutations/vote.graphql');
 
 const Link = ({ index, link, updateStoreAfterVote }) => {
   const authToken = localStorage.getItem(AUTH_TOKEN);

@@ -1,0 +1,23 @@
+# first: how many elements you want to load from the list
+# skip: offset (ex: if "5", first 5 results won't be sent back)
+query FeedQuery($first: Int, $skip: Int, $orderBy: LinkOrderByInput) {
+  feed(first: $first, skip: $skip, orderBy: $orderBy) {
+    links {
+      id
+      createdAt
+      url
+      description
+      postedBy {
+        id
+        name
+      }
+      votes {
+        id
+        user {
+          id
+        }
+      }
+    }
+    count
+  }
+}

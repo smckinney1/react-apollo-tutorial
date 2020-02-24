@@ -1,83 +1,18 @@
 import React from 'react';
 import { Query } from 'react-apollo';
-import gql from 'graphql-tag';
+import { loader } from 'graphql.macro';
 
 import Link from './Link';
 import { LINKS_PER_PAGE } from '../constants';
 
-// first: how many elements you want to load from the list
-// skip: offset (ex: if "5", first 5 results won't be sent back)
-export const FEED_QUERY = gql`
-  query FeedQuery($first: Int, $skip: Int, $orderBy: LinkOrderByInput) {
-    feed(first: $first, skip: $skip, orderBy: $orderBy) {
-      links {
-        id
-        createdAt
-        url
-        description
-        postedBy {
-          id
-          name
-        }
-        votes {
-          id
-          user {
-            id
-          }
-        }
-      }
-      count
-    }
-  }
-`;
+const FEED_QUERY = loader('../graphql/queries/feed.graphql');
 
-const NEW_LINKS_SUBSCRIPTION = gql`
-  subscription {
-    newLink {
-      id
-      url
-      description
-      createdAt
-      postedBy {
-        id
-        name
-      }
-      votes {
-        id
-        user {
-          id
-        }
-      }
-    }
-  }
-`;
-
-const NEW_VOTES_SUBSCRIPTION = gql`
-  subscription {
-    newVote {
-      id
-      link {
-        id
-        url
-        description
-        createdAt
-        postedBy {
-          id
-          name
-        }
-        votes {
-          id
-          user {
-            id
-          }
-        }
-      }
-      user {
-        id
-      }
-    }
-  }
-`;
+const NEW_LINKS_SUBSCRIPTION = loader(
+  '../graphql/subscriptions/newLink.graphql'
+);
+const NEW_VOTES_SUBSCRIPTION = loader(
+  '../graphql/subscriptions/newVote.graphql'
+);
 
 const LinkList = ({ history, location, match }) => {
   const currentPage = parseInt(match.params.page, 10);
