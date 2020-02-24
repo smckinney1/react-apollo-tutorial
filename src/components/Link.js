@@ -24,52 +24,56 @@ const VOTE_MUTATION = gql`
   }
 `;
 
-const Link = ({ link, updateStoreAfterVote }) => {
+const Link = ({ index, link, updateStoreAfterVote }) => {
   const authToken = localStorage.getItem(AUTH_TOKEN);
 
-  return (
-    <li>
-      <div className="flex mt3 items-start">
-        {authToken && (
-          <Mutation
-            mutation={VOTE_MUTATION}
-            variables={{ linkId: link.id }}
-            // update will be called right after server returns a response ("store" is current cache)
-            update={(store, { data: { vote } }) => {
-              updateStoreAfterVote(store, vote, link.id);
-            }}
-          >
-            {voteMutation => (
-              <button
-                className="ml1 br-none bg-none green pointer"
-                onClick={voteMutation}
-              >
-                ▲
-              </button>
-            )}
-          </Mutation>
-        )}
+  // Seems super hackish compared to using <ol>, but this is because of pagination.
+  const linkNumber = `${index + 1}.`;
 
-        <div className="ml1">
-          <div>
-            {link.description}{' '}
-            <a
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              alt={link.description}
+  return (
+    <div className="flex mt3 items-start">
+      <div className="flex items-center">
+        <span className="gray">{linkNumber}</span>
+      </div>
+      {authToken && (
+        <Mutation
+          mutation={VOTE_MUTATION}
+          variables={{ linkId: link.id }}
+          // update will be called right after server returns a response ("store" is current cache)
+          update={(store, { data: { vote } }) => {
+            updateStoreAfterVote(store, vote, link.id);
+          }}
+        >
+          {voteMutation => (
+            <button
+              className="ml1 br-none bg-none green pointer"
+              onClick={voteMutation}
             >
-              {link.url}
-            </a>
-          </div>
-          <div className="f6 lh-copy gray">
-            {link.votes?.length} votes | by{' '}
-            {link.postedBy?.name || 'Unknown User'}{' '}
-            {timeDifferenceForDate(link.createdAt)}
-          </div>
+              ▲
+            </button>
+          )}
+        </Mutation>
+      )}
+
+      <div className="ml1">
+        <div>
+          {link.description}{' '}
+          <a
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            alt={link.description}
+          >
+            {link.url}
+          </a>
+        </div>
+        <div className="f6 lh-copy gray">
+          {link.votes?.length} votes | by{' '}
+          {link.postedBy?.name || 'Unknown User'}{' '}
+          {timeDifferenceForDate(link.createdAt)}
         </div>
       </div>
-    </li>
+    </div>
   );
 };
 
