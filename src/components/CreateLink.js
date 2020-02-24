@@ -4,6 +4,7 @@ import { Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
 
 import { FEED_QUERY } from './LinkList';
+import { LINKS_PER_PAGE } from '../constants';
 
 // NOTE: The server provides no query to read the user, so "postedBy" can't be sent.
 const POST_MUTATION = gql`
@@ -24,16 +25,24 @@ const CreateLink = () => {
   const history = useHistory();
 
   const handleSubmit = () => {
-    history.push('/');
+    history.push('/new/1');
   };
 
   const updateStoreAfterCreate = (store, post) => {
-    const data = store.readQuery({ query: FEED_QUERY });
+    const first = LINKS_PER_PAGE;
+    const skip = 0;
+    const orderBy = 'createdAt_DESC';
+    const data = store.readQuery({
+      query: FEED_QUERY,
+      variables: { first, skip, orderBy },
+    });
+
     data.feed.links.unshift(post);
 
     store.writeQuery({
       query: FEED_QUERY,
       data,
+      variables: { first, skip, orderBy },
     });
   };
 
