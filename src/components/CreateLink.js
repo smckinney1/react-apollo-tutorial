@@ -65,7 +65,7 @@ const CreateLink = () => {
       >
         {postMutation => (
           <button className="pa2 br2 bg-green dark-gray" onClick={postMutation}>
-            Submit
+            submit
           </button>
         )}
       </Mutation>

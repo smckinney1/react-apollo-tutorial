@@ -3,10 +3,13 @@ import { Query } from 'react-apollo';
 import gql from 'graphql-tag';
 
 import Link from './Link';
+import { LINKS_PER_PAGE } from '../constants';
 
+// first: how many elements you want to load from the list
+// skip: offset (ex: if "5", first 5 results won't be sent back)
 export const FEED_QUERY = gql`
-  {
-    feed {
+  query FeedQuery($first: Int, $skip: Int, $orderBy: LinkOrderByInput) {
+    feed(first: $first, skip: $skip, orderBy: $orderBy) {
       links {
         id
         createdAt
@@ -23,6 +26,7 @@ export const FEED_QUERY = gql`
           }
         }
       }
+      count
     }
   }
 `;
@@ -75,7 +79,42 @@ const NEW_VOTES_SUBSCRIPTION = gql`
   }
 `;
 
-const LinkList = () => {
+const LinkList = ({ history, location, match }) => {
+  const currentPage = parseInt(match.params.page, 10);
+  const isFirstPage = currentPage <= 1;
+  const isNewPage = location.pathname.includes('new');
+
+  const getLinksToRender = links => {
+    if (isNewPage) return links;
+
+    const rankedLinks = [...links].sort(
+      (l1, l2) => l2.votes.length - l1.votes.length
+    );
+    return rankedLinks;
+  };
+
+  const getNextPage = feedCount => {
+    if (currentPage <= feedCount / LINKS_PER_PAGE) {
+      const nextPage = currentPage + 1;
+      history.push(`/new/${nextPage}`);
+    }
+  };
+
+  const getPreviousPage = () => {
+    if (!isFirstPage) {
+      const previousPage = currentPage - 1;
+      history.push(`/new/${previousPage}`);
+    }
+  };
+
+  const getQueryVariables = () => {
+    const skip = isNewPage ? (currentPage - 1) * LINKS_PER_PAGE : 0;
+    const first = isNewPage ? LINKS_PER_PAGE : 100;
+    const orderBy = isNewPage ? 'createdAt_DESC' : null;
+
+    return { first, skip, orderBy };
+  };
+
   const subscribeToNewLinks = async subscribeToMore => {
     subscribeToMore({
       document: NEW_LINKS_SUBSCRIPTION,
@@ -90,7 +129,7 @@ const LinkList = () => {
         return {
           ...prev,
           feed: {
-            links: [...prev.feed.links, newLink],
+            links: [newLink, ...prev.feed.links],
             count: prev.feed.links.length + 1,
             __typename: prev.feed.__typename,
           },
@@ -112,7 +151,7 @@ const LinkList = () => {
   };
 
   return (
-    <Query query={FEED_QUERY}>
+    <Query query={FEED_QUERY} variables={getQueryVariables()}>
       {({ loading, error, data, subscribeToMore }) => {
         if (loading) return <div>Loading...</div>;
         if (error) return <div>Error :(</div>;
@@ -120,18 +159,40 @@ const LinkList = () => {
         subscribeToNewLinks(subscribeToMore);
         subscribeToNewVotes(subscribeToMore);
 
-        const { links } = data.feed;
+        const linksToRender = getLinksToRender(data.feed.links);
+        const pageIndex = match.params.page
+          ? (match.params.page - 1) * LINKS_PER_PAGE
+          : 0;
 
         return (
-          <ol className="gray">
-            {links.map(link => (
+          <>
+            {linksToRender.map((link, index) => (
               <Link
                 key={link.id}
                 link={link}
+                index={index + pageIndex}
                 updateStoreAfterVote={updateStoreAfterVote}
               />
             ))}
-          </ol>
+            {isNewPage && (
+              <div className="flex ml4 mv3 gray">
+                <button
+                  className="pointer mr2 pa2 br2"
+                  onClick={getPreviousPage}
+                  disabled={isFirstPage}
+                >
+                  Previous
+                </button>
+                <button
+                  className="pointer pa2 br2"
+                  onClick={() => getNextPage(data.feed.count)}
+                  disabled={currentPage > data.feed.count / LINKS_PER_PAGE}
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
         );
       }}
     </Query>
